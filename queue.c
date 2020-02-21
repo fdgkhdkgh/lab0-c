@@ -13,7 +13,14 @@ queue_t *q_new()
 {
     queue_t *q = malloc(sizeof(queue_t));
     /* TODO: What if malloc returned NULL? */
+    if (q == NULL) {
+        printf("memory is not enough!\n");
+        exit(-1);
+        return NULL;
+    }
     q->head = NULL;
+    q->tail = NULL;
+    q->q_size = 0;
     return q;
 }
 
@@ -22,6 +29,19 @@ void q_free(queue_t *q)
 {
     /* TODO: How about freeing the list elements and the strings? */
     /* Free queue structure */
+    list_ele_t *now = q->head;
+
+    if (now == NULL) {
+    } else {
+        while (now) {
+            list_ele_t *next = now->next;
+
+            free(now->value);
+            free(now);
+
+            now = next;
+        }
+    }
     free(q);
 }
 
@@ -36,9 +56,39 @@ bool q_insert_head(queue_t *q, char *s)
 {
     list_ele_t *newh;
     /* TODO: What should you do if the q is NULL? */
+
+    if (q == NULL) {
+        return false;
+    }
+
     newh = malloc(sizeof(list_ele_t));
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
+
+    if (newh == NULL) {
+        printf("malloc returns NULL!\n");
+        return false;
+    }
+
+    newh->value = (char *) malloc(sizeof(char) * strlen(s) + 1);
+
+    if (newh->value == NULL) {
+        printf("malloc returns NULL!\n");
+        free(newh);
+        return false;
+    }
+
+    newh->next = NULL;
+    strncpy(newh->value, s, strlen(s));
+
+    // printf("size of s :%zu\n", strlen(s));
+    //學到一課了，format string可以用%zu
+    printf("string : %s\n", newh->value);
+
+    if (q->head == NULL) {
+        q->tail = newh;
+    }
+
     newh->next = q->head;
     q->head = newh;
     return true;
@@ -56,7 +106,45 @@ bool q_insert_tail(queue_t *q, char *s)
     /* TODO: You need to write the complete code for this function */
     /* Remember: It should operate in O(1) time */
     /* TODO: Remove the above comment when you are about to implement. */
-    return false;
+    list_ele_t *newt;
+
+    if (q == NULL) {
+        return false;
+    }
+
+    newt = malloc(sizeof(list_ele_t));
+    /* Don't forget to allocate space for the string and copy it */
+    /* What if either call to malloc returns NULL? */
+
+    if (newt == NULL) {
+        printf("malloc returns NULL!\n");
+        return false;
+    }
+
+    newt->value = (char *) malloc(sizeof(char) * strlen(s) + 1);
+
+    if (newt->value == NULL) {
+        printf("malloc returns NULL!\n");
+        free(newt);
+        return false;
+    }
+
+    newt->next = NULL;
+    strncpy(newt->value, s, strlen(s));
+
+    printf("size of s :%zu\n", strlen(s));
+    printf("string : %s\n", newt->value);
+
+    if (q->tail == NULL) {
+        q->head = newt;
+        q->tail = newt;
+
+    } else {
+        q->tail->next = newt;
+        q->tail = newt;
+    }
+
+    return true;
 }
 
 /*

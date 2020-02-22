@@ -253,7 +253,97 @@ void q_reverse(queue_t *q)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-//改成merge sort
+void merge(int left, int right, list_ele_t **array)
+{
+    // list_ele_t *temparray[right-left+1];
+    // list_ele_t **temparray = (list_ele_t**)malloc(sizeof(list_ele_t*) *
+    // (right-left+1));
+
+    list_ele_t *temphead = NULL;
+    list_ele_t *now = NULL;
+
+    // printf("temp array size : %d\n", right-left+1);
+
+    // int tempindex = 0;
+
+    int mid = (left + right) / 2;
+
+    int leftindex = left;
+    int rightindex = mid + 1;
+
+    while (leftindex <= mid && rightindex <= right) {
+        if (strcmp(array[leftindex]->value, array[rightindex]->value) <= 0) {
+            // temparray[tempindex] = array[leftindex];
+            if (temphead == NULL) {
+                temphead = array[leftindex];
+                now = temphead;
+            } else {
+                now->next = array[leftindex];
+                now = now->next;
+            }
+            leftindex++;
+        } else {
+            // temparray[tempindex] = array[rightindex];
+            if (temphead == NULL) {
+                temphead = array[rightindex];
+                now = temphead;
+            } else {
+                now->next = array[rightindex];
+                now = now->next;
+            }
+            rightindex++;
+        }
+        // tempindex++;
+    }
+
+    while (leftindex <= mid) {
+        // temparray[tempindex] = array[leftindex];
+        now->next = array[leftindex];
+        now = now->next;
+
+        leftindex++;
+        // tempindex++;
+    }
+
+    while (rightindex <= right) {
+        // temparray[tempindex] = array[rightindex];
+        now->next = array[rightindex];
+        now = now->next;
+
+        rightindex++;
+        // tempindex++;
+    }
+
+    now->next = NULL;
+
+    /*tempindex = 0;
+    for(int i = left;i <= right;i++){
+        array[i] = temparray[tempindex];
+    tempindex++;
+    }*/
+    int index = left;
+    for (list_ele_t *i = temphead; i != NULL; i = i->next) {
+        array[index] = i;
+        index++;
+    }
+}
+
+void mergeSort(int left, int right, list_ele_t **array)
+{
+    if (left >= right) {
+        return;
+    }
+
+    // printf("left : %d\n", left);
+    // printf("right : %d\n", right);
+
+    int mid = (left + right) / 2;
+
+    mergeSort(left, mid, array);
+    mergeSort(mid + 1, right, array);
+
+    merge(left, right, array);
+}
 
 void q_sort(queue_t *q)
 {
@@ -264,8 +354,40 @@ void q_sort(queue_t *q)
         return;
     }
 
+    list_ele_t *pointer_array[q->q_size];
+    //要想辦法把這個array精簡掉...
+    //想到一個辦法，因為我們已知q->q_size，所以我們可以在O(N)時間內把一個linked
+    // list拆成兩半 mergeSort改成mergeSort(list_ele_t *lefthead, list_ele_t
+    // *righthead, int element_size) merge改成merge(list_ele_t *lefthead,
+    // list_ele_t *righthead, int element_size)
+    //
+    // pointer_array = (list_ele_t**)malloc(sizeof(list_ele_t*) * q->q_size);
 
+    int index = 0;
+    for (list_ele_t *i = q->head; i != NULL; i = i->next, index++) {
+        pointer_array[index] = i;
+    }
 
+    mergeSort(0, q->q_size - 1, pointer_array);
+
+    list_ele_t *newhead = NULL;
+    list_ele_t *last = NULL;
+    for (int i = 0; i < q->q_size; i++) {
+        if (i == 0) {
+            newhead = pointer_array[i];
+            last = newhead;
+        } else {
+            last->next = pointer_array[i];
+            last = pointer_array[i];
+        }
+    }
+    last->next = NULL;
+
+    q->head = newhead;
+    q->tail = pointer_array[q->q_size - 1];
+    // from array to list
+
+    /*
     list_ele_t *sorted = q->head;
     list_ele_t *unsorted_head = q->head->next;
 
@@ -310,4 +432,5 @@ void q_sort(queue_t *q)
     }
 
     q->head = sorted;
+    */
 }

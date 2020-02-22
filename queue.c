@@ -253,96 +253,123 @@ void q_reverse(queue_t *q)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void merge(int left, int right, list_ele_t **array)
-{
-    // list_ele_t *temparray[right-left+1];
-    // list_ele_t **temparray = (list_ele_t**)malloc(sizeof(list_ele_t*) *
-    // (right-left+1));
 
+list_ele_t *merge(list_ele_t *lefthead,
+                  list_ele_t *righthead,
+                  int leftsize,
+                  int rightsize)
+{
+    int headsize = 0;
     list_ele_t *temphead = NULL;
     list_ele_t *now = NULL;
+    while (leftsize != 0 && rightsize != 0) {
+        if (strcmp(lefthead->value, righthead->value) <= 0) {
+            if (headsize == 0) {
+                temphead = lefthead;
+                lefthead = lefthead->next;
+                temphead->next = NULL;
 
-    // printf("temp array size : %d\n", right-left+1);
-
-    // int tempindex = 0;
-
-    int mid = (left + right) / 2;
-
-    int leftindex = left;
-    int rightindex = mid + 1;
-
-    while (leftindex <= mid && rightindex <= right) {
-        if (strcmp(array[leftindex]->value, array[rightindex]->value) <= 0) {
-            // temparray[tempindex] = array[leftindex];
-            if (temphead == NULL) {
-                temphead = array[leftindex];
                 now = temphead;
+
             } else {
-                now->next = array[leftindex];
+                now->next = lefthead;
+                lefthead = lefthead->next;
                 now = now->next;
+                now->next = NULL;
             }
-            leftindex++;
+            leftsize--;
         } else {
-            // temparray[tempindex] = array[rightindex];
-            if (temphead == NULL) {
-                temphead = array[rightindex];
+            if (headsize == 0) {
+                temphead = righthead;
+                righthead = righthead->next;
+                temphead->next = NULL;
+
                 now = temphead;
             } else {
-                now->next = array[rightindex];
+                now->next = righthead;
+                righthead = righthead->next;
                 now = now->next;
+                now->next = NULL;
             }
-            rightindex++;
+            rightsize--;
         }
-        // tempindex++;
+        headsize++;
     }
 
-    while (leftindex <= mid) {
-        // temparray[tempindex] = array[leftindex];
-        now->next = array[leftindex];
-        now = now->next;
+    while (leftsize != 0) {
+        if (headsize == 0) {
+            temphead = lefthead;
+            lefthead = lefthead->next;
+            temphead->next = NULL;
 
-        leftindex++;
-        // tempindex++;
+            now = temphead;
+        } else {
+            now->next = lefthead;
+            lefthead = lefthead->next;
+            now = now->next;
+            now->next = NULL;
+        }
+        leftsize--;
+        headsize++;
     }
 
-    while (rightindex <= right) {
-        // temparray[tempindex] = array[rightindex];
-        now->next = array[rightindex];
-        now = now->next;
+    while (rightsize != 0) {
+        if (headsize == 0) {
+            temphead = righthead;
+            righthead = righthead->next;
+            temphead->next = NULL;
 
-        rightindex++;
-        // tempindex++;
+            now = temphead;
+        } else {
+            now->next = righthead;
+            righthead = righthead->next;
+            now = now->next;
+            now->next = NULL;
+        }
+        rightsize--;
+        headsize++;
     }
-
-    now->next = NULL;
-
-    /*tempindex = 0;
-    for(int i = left;i <= right;i++){
-        array[i] = temparray[tempindex];
-    tempindex++;
-    }*/
-    int index = left;
-    for (list_ele_t *i = temphead; i != NULL; i = i->next) {
-        array[index] = i;
-        index++;
-    }
+    return temphead;
 }
 
-void mergeSort(int left, int right, list_ele_t **array)
+list_ele_t *mergeSort(list_ele_t *lefthead,
+                      list_ele_t *righthead,
+                      int leftsize,
+                      int rightsize)
 {
-    if (left >= right) {
-        return;
+    if (leftsize == 0 || rightsize == 0) {
+        return NULL;
+    }
+    int i;
+
+    int lhalf_qsize = leftsize / 2;
+    list_ele_t *llhead = lefthead;
+    list_ele_t *lrhead = lefthead;
+    int llsize = lhalf_qsize;
+    int lrsize = leftsize - llsize;
+    for (i = 0; i < lhalf_qsize; i++) {
+        lrhead = lrhead->next;
+    }
+    llhead = mergeSort(llhead, lrhead, llsize, lrsize);
+    if (llsize == 0 && lrsize == 1) {
+        llhead = lrhead;
+        llhead->next = NULL;
     }
 
-    // printf("left : %d\n", left);
-    // printf("right : %d\n", right);
-
-    int mid = (left + right) / 2;
-
-    mergeSort(left, mid, array);
-    mergeSort(mid + 1, right, array);
-
-    merge(left, right, array);
+    int rhalf_qsize = rightsize / 2;
+    list_ele_t *rlhead = righthead;
+    list_ele_t *rrhead = righthead;
+    int rlsize = rhalf_qsize;
+    int rrsize = rightsize - rhalf_qsize;
+    for (i = 0; i < rhalf_qsize; i++) {
+        rrhead = rrhead->next;
+    }
+    rlhead = mergeSort(rlhead, rrhead, rlsize, rrsize);
+    if (rlsize == 0 && rrsize == 1) {
+        rlhead = rrhead;
+        rlhead->next = NULL;
+    }
+    return merge(llhead, rlhead, leftsize, rightsize);
 }
 
 void q_sort(queue_t *q)
@@ -353,84 +380,14 @@ void q_sort(queue_t *q)
     if (q == NULL || q->head == NULL || q->head->next == NULL) {
         return;
     }
-
-    list_ele_t *pointer_array[q->q_size];
-    //要想辦法把這個array精簡掉...
-    //想到一個辦法，因為我們已知q->q_size，所以我們可以在O(N)時間內把一個linked
-    // list拆成兩半 mergeSort改成mergeSort(list_ele_t *lefthead, list_ele_t
-    // *righthead, int element_size) merge改成merge(list_ele_t *lefthead,
-    // list_ele_t *righthead, int element_size)
-    //
-    // pointer_array = (list_ele_t**)malloc(sizeof(list_ele_t*) * q->q_size);
-
-    int index = 0;
-    for (list_ele_t *i = q->head; i != NULL; i = i->next, index++) {
-        pointer_array[index] = i;
+    int half_qsize = q->q_size / 2;
+    int i = 0;
+    list_ele_t *lefthead = q->head;
+    list_ele_t *righthead = q->head;
+    int leftsize = q->q_size / 2;
+    int rightsize = q->q_size - leftsize;
+    for (i = 0; i < half_qsize; i++) {
+        righthead = righthead->next;
     }
-
-    mergeSort(0, q->q_size - 1, pointer_array);
-
-    list_ele_t *newhead = NULL;
-    list_ele_t *last = NULL;
-    for (int i = 0; i < q->q_size; i++) {
-        if (i == 0) {
-            newhead = pointer_array[i];
-            last = newhead;
-        } else {
-            last->next = pointer_array[i];
-            last = pointer_array[i];
-        }
-    }
-    last->next = NULL;
-
-    q->head = newhead;
-    q->tail = pointer_array[q->q_size - 1];
-    // from array to list
-
-    /*
-    list_ele_t *sorted = q->head;
-    list_ele_t *unsorted_head = q->head->next;
-
-    sorted->next = NULL;
-
-    while (unsorted_head) {
-        list_ele_t *last = NULL;
-        list_ele_t *i;
-        for (i = sorted; i != NULL; last = i, i = i->next) {
-            if (strcmp(unsorted_head->value, i->value) <= 0) {
-                // printf("unsorted_head->value : %s\n", unsorted_head->value);
-                // printf("i->value : %s\n", i->value);
-
-                if (last == NULL) {
-                    list_ele_t *temp;
-                    temp = unsorted_head->next;
-
-                    unsorted_head->next = sorted;
-                    sorted = unsorted_head;
-                    unsorted_head = temp;
-
-                } else {
-                    list_ele_t *temp;
-                    temp = unsorted_head->next;
-
-                    last->next = unsorted_head;
-                    unsorted_head->next = i;
-
-                    unsorted_head = temp;
-                }
-                break;
-            }
-        }
-        if (i == NULL) {
-            list_ele_t *temp;
-            temp = unsorted_head->next;
-
-            last->next = unsorted_head;
-            unsorted_head->next = NULL;
-            unsorted_head = temp;
-        }
-    }
-
-    q->head = sorted;
-    */
+    q->head = mergeSort(lefthead, righthead, leftsize, rightsize);
 }

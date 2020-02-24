@@ -12,10 +12,7 @@
 queue_t *q_new()
 {
     queue_t *q = malloc(sizeof(queue_t));
-    /* TODO: What if malloc returned NULL? */
     if (q == NULL) {
-        // printf("memory is not enough!\n");
-        // exit(-1);
         return NULL;
     }
     q->head = NULL;
@@ -31,8 +28,6 @@ void q_free(queue_t *q)
         return;
     }
 
-    /* TODO: How about freeing the list elements and the strings? */
-    /* Free queue structure */
     list_ele_t *now = q->head;
 
     if (now == NULL) {
@@ -46,6 +41,7 @@ void q_free(queue_t *q)
             now = next;
         }
     }
+    /* Free queue structure */
     free(q);
 }
 
@@ -59,7 +55,6 @@ void q_free(queue_t *q)
 bool q_insert_head(queue_t *q, char *s)
 {
     list_ele_t *newh;
-    /* TODO: What should you do if the q is NULL? */
 
     if (q == NULL) {
         return false;
@@ -70,14 +65,12 @@ bool q_insert_head(queue_t *q, char *s)
     /* What if either call to malloc returns NULL? */
 
     if (newh == NULL) {
-        // printf("malloc returns NULL!\n");
         return false;
     }
 
     newh->value = (char *) malloc(sizeof(char) * strlen(s) + 1);
 
     if (newh->value == NULL) {
-        // printf("malloc returns NULL!\n");
         free(newh);
         return false;
     }
@@ -85,10 +78,6 @@ bool q_insert_head(queue_t *q, char *s)
     newh->next = NULL;
     strncpy(newh->value, s, strlen(s));
     newh->value[strlen(s)] = 0;
-
-    // printf("size of s :%zu\n", strlen(s));
-    //學到一課了，format string可以用%zu
-    // printf("string : %s\n", newh->value);
 
     if (q->head == NULL) {
         q->tail = newh;
@@ -111,10 +100,8 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    /* TODO: You need to write the complete code for this function */
-    /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
     list_ele_t *newt;
+    int charlen = strlen(s);
 
     if (q == NULL) {
         return false;
@@ -125,29 +112,23 @@ bool q_insert_tail(queue_t *q, char *s)
     /* What if either call to malloc returns NULL? */
 
     if (newt == NULL) {
-        // printf("malloc returns NULL!\n");
         return false;
     }
 
-    newt->value = (char *) malloc(sizeof(char) * strlen(s) + 1);
+    newt->value = (char *) malloc(sizeof(char) * charlen + 1);
 
     if (newt->value == NULL) {
-        // printf("malloc returns NULL!\n");
         free(newt);
         return false;
     }
 
     newt->next = NULL;
-    strncpy(newt->value, s, strlen(s));
-    newt->value[strlen(s)] = 0;
-
-    // printf("size of s :%zu\n", strlen(s));
-    // printf("string : %s\n", newt->value);
+    strncpy(newt->value, s, charlen);
+    newt->value[charlen] = 0;
 
     if (q->tail == NULL) {
         q->head = newt;
         q->tail = newt;
-
     } else {
         q->tail->next = newt;
         q->tail = newt;
@@ -181,8 +162,6 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 
     deleted = q->head;
 
-    /* TODO: You need to fix up this code. */
-    /* TODO: Remove the above comment when you are about to implement. */
     q->head = q->head->next;
 
     free(deleted->value);
@@ -206,9 +185,6 @@ int q_size(queue_t *q)
     if (q == NULL || q->head == NULL) {
         return 0;
     }
-    /* TODO: You need to write the code for this function */
-    /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
     return q->q_size;
 }
 
@@ -221,9 +197,6 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
-
     if (q == NULL || q->head == NULL || q->head->next == NULL) {
         return;
     }
@@ -374,9 +347,6 @@ list_ele_t *mergeSort(list_ele_t *lefthead,
 
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
-
     if (q == NULL || q->head == NULL || q->head->next == NULL) {
         return;
     }
